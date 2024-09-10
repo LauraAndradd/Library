@@ -1,5 +1,4 @@
-
-using Library.Infrastructure.Persistence;
+using Library.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library
