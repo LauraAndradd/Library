@@ -1,8 +1,7 @@
-﻿using Library.Entities;
-using Library.Models;
-using Library.Persistence;
+﻿using Library.Application.Models;
+using Library.Application.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Library.Controllers
 {
@@ -10,57 +9,51 @@ namespace Library.Controllers
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
-        private readonly LibraryDbContext _context;
+        private readonly BookService _bookService;
 
-        public BooksController(LibraryDbContext context)
+        public BooksController(BookService bookService)
         {
-            _context = context;
+            _bookService = bookService;
         }
 
         [HttpPost]
         public async Task<IActionResult> AddBook([FromBody] CreateBookInputModel request)
         {
-            if (request == null)
-                return BadRequest("Invalid book.");
+            var result = await _bookService.AddBookAsync(request);
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
 
-            var book = new Book(request.Title, request.Author, request.ISBN, request.PublicationYear);
-
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
-
-            return Ok("Book registered successfully!");
+            return Ok(result.Message);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllBooks()
         {
-            var books = await _context.Books.ToListAsync();
-            var bookViewModels = books.Select(BookViewModel.FromEntity).ToList();
-            return Ok(bookViewModels);
+            var result = await _bookService.GetAllBooksAsync();
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookById(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-                return NotFound("Book not found.");
+            var result = await _bookService.GetBookByIdAsync(id);
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
 
-            var bookViewModel = BookViewModel.FromEntity(book);
-            return Ok(bookViewModel);
+            return Ok(result.Data);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemoveBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-                return NotFound("Book not found.");
+            var result = await _bookService.RemoveBookAsync(id);
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
 
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
-
-            return Ok("Book removed successfully!");
+            return Ok(result.Message);
         }
     }
 }

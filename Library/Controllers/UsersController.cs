@@ -1,6 +1,5 @@
-﻿using Library.Entities;
-using Library.Models;
-using Library.Persistence;
+﻿using Library.Application.Models;
+using Library.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
@@ -9,25 +8,21 @@ namespace Library.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly LibraryDbContext _context;
+        private readonly UserService _userService;
 
-        public UsersController(LibraryDbContext context)
+        public UsersController(UserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [HttpPost]
         public async Task<IActionResult> AddUser([FromBody] CreateUserInputModel request)
         {
-            if (request == null)
-                return BadRequest("Invalid user.");
+            var result = await _userService.AddUserAsync(request);
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
 
-            var user = new User(request.Username, request.Email);
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok("User registered successfully!");
+            return Ok(result.Message);
         }
     }
 }

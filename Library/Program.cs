@@ -1,4 +1,5 @@
-using Library.Persistence;
+using Library.Application.Services;
+using Library.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library
@@ -16,7 +17,13 @@ namespace Library
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddDbContext<LibraryDbContext>(o => o.UseInMemoryDatabase("LibraryDb"));
+            var connectionString = builder.Configuration.GetConnectionString("LibraryCs");
+            builder.Services.AddDbContext<LibraryDbContext>(o => o.UseSqlServer(connectionString));
+
+            builder.Services.AddSingleton<BookService>();
+            builder.Services.AddSingleton<LoanService>();
+            builder.Services.AddSingleton<UserService>();
+
 
             var app = builder.Build();
 

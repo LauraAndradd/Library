@@ -1,7 +1,8 @@
-﻿using Library.Entities;
-using Library.Models;
-using Library.Persistence;
+﻿using Library.Application.Models;
+using Library.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace Library.Controllers
 {
@@ -9,54 +10,41 @@ namespace Library.Controllers
     [Route("api/[controller]")]
     public class LoansController : ControllerBase
     {
-        private readonly LibraryDbContext _context;
+        private readonly LoanService _loanService;
 
-        public LoansController(LibraryDbContext context)
+        public LoansController(LoanService loanService)
         {
-            _context = context;
+            _loanService = loanService;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateLoan([FromBody] CreateLoanInputModel request)
         {
-            if (request == null)
-                return BadRequest("Invalid loan.");
+            var result = await _loanService.CreateLoanAsync(request);
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
 
-            var loan = new Loan(request.UserId, request.BookId, request.LoanDate, DateTime.Now.AddDays(14), null, false);
-
-            _context.Loans.Add(loan);
-            await _context.SaveChangesAsync();
-
-            return Ok("Loan registered successfully!");
+            return Ok(result.Message);
         }
 
         [HttpPost("return")]
         public async Task<IActionResult> RegisterReturn(int loanId, DateTime returnDate)
         {
-            var loan = await _context.Loans.FindAsync(loanId);
-            if (loan == null)
-                return NotFound("Loan not found.");
+            var result = await _loanService.RegisterReturnAsync(loanId, returnDate);
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
 
-            loan.MarkAsReturned(returnDate);
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Return registered successfully!");
+            return Ok(result.Message);
         }
-
 
         [HttpGet("check-delay/{loanId}")]
         public async Task<IActionResult> CheckForDelay(int loanId)
         {
-            var loan = await _context.Loans.FindAsync(loanId);
-            if (loan == null)
-                return NotFound("Loan not found.");
+            var result = await _loanService.CheckForDelayAsync(loanId);
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
 
-            var message = loan.IsReturned
-                ? "Loan returned."
-                : "Loan not returned yet.";
-
-            return Ok(message);
+            return Ok(result.Message);
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿using Library.Entities;
+﻿using Library.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Library.Persistence
+namespace Library.Infrastructure.Persistence
 {
     public class LibraryDbContext : DbContext
     {
