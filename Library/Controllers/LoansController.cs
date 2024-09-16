@@ -1,8 +1,6 @@
-﻿using Library.Application.Models;
-using Library.Application.Services;
+﻿using Library.Application.Interfaces;
+using Library.Application.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace Library.Controllers
 {
@@ -10,9 +8,9 @@ namespace Library.Controllers
     [Route("api/[controller]")]
     public class LoansController : ControllerBase
     {
-        private readonly LoanService _loanService;
+        private readonly ILoanService _loanService;
 
-        public LoansController(LoanService loanService)
+        public LoansController(ILoanService loanService)
         {
             _loanService = loanService;
         }

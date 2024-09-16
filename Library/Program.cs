@@ -1,3 +1,4 @@
+using Library.Application;
 using Library.Application.Services;
 using Library.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -20,10 +21,7 @@ namespace Library
             var connectionString = builder.Configuration.GetConnectionString("LibraryCs");
             builder.Services.AddDbContext<LibraryDbContext>(o => o.UseSqlServer(connectionString));
 
-            builder.Services.AddSingleton<BookService>();
-            builder.Services.AddSingleton<LoanService>();
-            builder.Services.AddSingleton<UserService>();
-
+            builder.Services.AddApplication();
 
             var app = builder.Build();
 
