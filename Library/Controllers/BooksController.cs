@@ -15,16 +15,6 @@ namespace Library.Controllers
             _bookService = bookService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddBook([FromBody] CreateBookInputModel request)
-        {
-            var result = await _bookService.AddBookAsync(request);
-            if (!result.IsSuccess)
-                return BadRequest(result.Message);
-
-            return Ok(result.Message);
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetAllBooks()
         {
@@ -43,6 +33,26 @@ namespace Library.Controllers
                 return NotFound(result.Message);
 
             return Ok(result.Data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddBook([FromBody] CreateBookInputModel request)
+        {
+            var result = await _bookService.AddBookAsync(request);
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBook(int id, [FromBody] UpdateBookInputModel request)
+        {
+            var result = await _bookService.UpdateBookAsync(id, request);
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
+
+            return Ok(result.Message);
         }
 
         [HttpDelete("{id}")]

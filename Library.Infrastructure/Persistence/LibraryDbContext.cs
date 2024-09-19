@@ -22,7 +22,6 @@ namespace Library.Infrastructure.Persistence
                 e.HasKey(b => b.Id); // Definir chave primária
                 e.Property(b => b.Title).IsRequired().HasMaxLength(100); // Título obrigatório e com limite de caracteres
                 e.Property(b => b.Author).IsRequired().HasMaxLength(100); // Autor obrigatório e com limite de caracteres
-                e.Property(b => b.ISBN).HasMaxLength(13); // ISBN com tamanho máximo de 13 caracteres
                 e.Property(b => b.PublicationYear).IsRequired(); // Ano obrigatório
             });
 

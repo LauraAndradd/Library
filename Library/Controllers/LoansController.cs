@@ -1,5 +1,7 @@
 ﻿using Library.Application.Interfaces;
 using Library.Application.Models;
+using Library.Application.Queries.GetLoansByUserQuery;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
@@ -9,10 +11,12 @@ namespace Library.Controllers
     public class LoansController : ControllerBase
     {
         private readonly ILoanService _loanService;
+        private readonly IMediator _mediator;
 
-        public LoansController(ILoanService loanService)
+        public LoansController(ILoanService loanService, IMediator mediator)
         {
             _loanService = loanService;
+            _mediator = mediator;
         }
 
         [HttpPost]
@@ -43,6 +47,17 @@ namespace Library.Controllers
                 return NotFound(result.Message);
 
             return Ok(result.Message);
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetLoansByUser(int userId)
+        {
+            var query = new GetLoansByUserQuery { UserId = userId };
+            var result = await _mediator.Send(query);
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
+
+            return Ok(result.Data);
         }
     }
 }

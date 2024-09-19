@@ -1,17 +1,21 @@
 ﻿using Library.Application.Interfaces;
 using Library.Application.Models;
-using Library.Core.Entities;
-using Library.Infrastructure.Persistence;
+using Library.Application.Commands.AddLoanCommand;
+using Library.Application.Commands.ReturnLoanCommand;
+using Library.Application.Queries.CheckLoanDelayQuery;
+using MediatR;
+using System.Threading.Tasks;
+using Library.Application.Queries.GetLoansByUserQuery;
 
 namespace Library.Application.Services
 {
     public class LoanService : ILoanService
     {
-        private readonly LibraryDbContext _context;
+        private readonly IMediator _mediator;
 
-        public LoanService(LibraryDbContext context)
+        public LoanService(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
         public async Task<ResultViewModel> CreateLoanAsync(CreateLoanInputModel request)
@@ -19,37 +23,46 @@ namespace Library.Application.Services
             if (request == null)
                 return new ResultViewModel(false, "Invalid loan.");
 
-            var loan = new Loan(request.UserId, request.BookId, request.LoanDate, DateTime.Now.AddDays(14), null, false);
+            // Cria um comando para adicionar o empréstimo
+            var command = new AddLoanCommand
+            {
+                UserId = request.UserId,
+                BookId = request.BookId,
+                LoanDate = request.LoanDate,
+                DueDate = DateTime.Now.AddDays(14)
+            };
 
-            _context.Loans.Add(loan);
-            await _context.SaveChangesAsync();
-
-            return new ResultViewModel(true, "Loan registered successfully!");
+            // Envia o comando para o MediatR e retorna o resultado
+            return await _mediator.Send(command);
         }
 
         public async Task<ResultViewModel> RegisterReturnAsync(int loanId, DateTime returnDate)
         {
-            var loan = await _context.Loans.FindAsync(loanId);
-            if (loan == null)
-                return new ResultViewModel(false, "Loan not found.");
+            // Cria um comando para registrar a devolução
+            var command = new ReturnLoanCommand
+            {
+                LoanId = loanId,
+                ReturnDate = returnDate
+            };
 
-            loan.MarkAsReturned(returnDate);
-            await _context.SaveChangesAsync();
-
-            return new ResultViewModel(true, "Return registered successfully!");
+            // Envia o comando para o MediatR e retorna o resultado
+            return await _mediator.Send(command);
         }
 
         public async Task<ResultViewModel> CheckForDelayAsync(int loanId)
         {
-            var loan = await _context.Loans.FindAsync(loanId);
-            if (loan == null)
-                return new ResultViewModel(false, "Loan not found.");
+            // Cria uma query para verificar se o empréstimo está em atraso
+            var query = new CheckLoanDelayQuery { LoanId = loanId };
 
-            var message = loan.IsReturned
-                ? "Loan returned."
-                : "Loan not returned yet.";
+            // Envia a query para o MediatR e retorna o resultado
+            return await _mediator.Send(query);
+        }
 
-            return new ResultViewModel(true, message);
+        public async Task<ResultViewModel<List<LoanViewModel>>> GetLoansByUserAsync(int userId)
+        {
+            var query = new GetLoansByUserQuery { UserId = userId };
+
+            return await _mediator.Send(query);
         }
     }
 }

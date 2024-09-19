@@ -16,6 +16,16 @@ namespace Library.Application.Models
 
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
+
+        public static ResultViewModel Success(string message = "Operation completed successfully.")
+        {
+            return new ResultViewModel(true, message);
+        }
+
+        public static ResultViewModel Error(string message)
+        {
+            return new ResultViewModel(false, message);
+        }
     }
 
     public class ResultViewModel<T> : ResultViewModel
@@ -26,5 +36,15 @@ namespace Library.Application.Models
         }
 
         public T? Data { get; set; }
+
+        public static ResultViewModel<T> Success(T data, string message = "Operação realizada com sucesso.")
+        {
+            return new ResultViewModel<T>(data, true, message);
+        }
+
+        public static new ResultViewModel<T> Error(string message)
+        {
+            return new ResultViewModel<T>(default, false, message);
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Library.Application.Interfaces;
 using Library.Application.Models;
-using Library.Application.Services;
+using Library.Application.Queries.GetUserByIdQuery;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
@@ -10,10 +11,12 @@ namespace Library.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMediator _mediator;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMediator mediator)
         {
             _userService = userService;
+            _mediator = mediator;
         }
 
         [HttpPost]
@@ -24,6 +27,18 @@ namespace Library.Controllers
                 return BadRequest(result.Message);
 
             return Ok(result.Message);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            var query = new GetUserByIdQuery { UserId = id };
+            var result = await _mediator.Send(query);
+
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
+
+            return Ok(result.Data);
         }
     }
 }

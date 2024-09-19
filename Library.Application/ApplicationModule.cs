@@ -1,11 +1,9 @@
 ﻿using Library.Application.Interfaces;
+using Library.Application.Models;
 using Library.Application.Services;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Library.Application
 {
@@ -24,6 +22,13 @@ namespace Library.Application
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<ILoanService, LoanService>();
             services.AddScoped<IUserService, UserService>();
+            return services;
+        }
+
+        private static IServiceCollection AddHandlers(this IServiceCollection services)
+        {
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+
             return services;
         }
     }

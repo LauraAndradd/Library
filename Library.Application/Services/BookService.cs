@@ -1,7 +1,13 @@
-﻿using Library.Application.Interfaces;
+﻿using Library.Application.Commands.AddBookCommand;
+using Library.Application.Commands.RemoveBookCommand;
+using Library.Application.Commands.UpdateBookCommand;
+using Library.Application.Interfaces;
 using Library.Application.Models;
+using Library.Application.Queries.GetAllBooksQuery;
+using Library.Application.Queries.GetBookByIdQuery;
 using Library.Core.Entities;
 using Library.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.Application.Services
@@ -9,52 +15,64 @@ namespace Library.Application.Services
     public class BookService : IBookService
     {
         private readonly LibraryDbContext _context;
+        private readonly IMediator _mediator;
 
-        public BookService(LibraryDbContext context)
+        public BookService(LibraryDbContext context, IMediator mediator)
         {
             _context = context;
+            _mediator = mediator;
         }
+
+        public async Task<ResultViewModel<List<BookViewModel>>> GetAllBooksAsync()
+        {
+            var query = new GetAllBooksQuery();
+            return await _mediator.Send(query);
+        }
+
+        public async Task<ResultViewModel<BookViewModel>> GetBookByIdAsync(int id)
+        {
+            var query = new GetBookByIdQuery { BookId = id };
+            var result = await _mediator.Send(query);
+
+            return result;
+        }
+
 
         public async Task<ResultViewModel> AddBookAsync(CreateBookInputModel request)
         {
             if (request == null)
                 return new ResultViewModel(false, "Invalid book.");
 
-            var book = new Book(request.Title, request.Author, request.ISBN, request.PublicationYear);
+            var command = new AddBookCommand
+            {
+                Title = request.Title,
+                Author = request.Author,
+                PublicationYear = request.PublicationYear
+            };
 
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
-
-            return new ResultViewModel(true, "Book registered successfully!");
+            return await _mediator.Send(command);
         }
 
-        public async Task<ResultViewModel<List<BookViewModel>>> GetAllBooksAsync()
+        public async Task<ResultViewModel> UpdateBookAsync(int id, UpdateBookInputModel request)
         {
-            var books = await _context.Books.ToListAsync();
-            var bookViewModels = books.Select(BookViewModel.FromEntity).ToList();
-            return new ResultViewModel<List<BookViewModel>>(bookViewModels);
-        }
+            if (request == null)
+                return new ResultViewModel(false, "Invalid book data.");
 
-        public async Task<ResultViewModel<BookViewModel>> GetBookByIdAsync(int id)
-        {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-                return new ResultViewModel<BookViewModel>(null, false, "Book not found.");
+            var command = new UpdateBookCommand
+            {
+                BookId = id,
+                Title = request.Title,
+                Author = request.Author,
+                PublicationYear = (int)request.PublicationYear
+            };
 
-            var bookViewModel = BookViewModel.FromEntity(book);
-            return new ResultViewModel<BookViewModel>(bookViewModel);
+            return await _mediator.Send(command);
         }
 
         public async Task<ResultViewModel> RemoveBookAsync(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-                return new ResultViewModel(false, "Book not found.");
-
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
-
-            return new ResultViewModel(true, "Book removed successfully!");
+            var command = new RemoveBookCommand { BookId = id };
+            return await _mediator.Send(command);
         }
     }
 }

@@ -1,17 +1,18 @@
-﻿using Library.Application.Interfaces;
+﻿using Library.Application.Commands.AddUserCommand;
+using Library.Application.Interfaces;
 using Library.Application.Models;
-using Library.Core.Entities;
-using Library.Infrastructure.Persistence;
+using Library.Application.Queries.GetUserByIdQuery;
+using MediatR;
 
 namespace Library.Application.Services
 {
     public class UserService : IUserService
     {
-        private readonly LibraryDbContext _context;
+        private readonly IMediator _mediator;
 
-        public UserService(LibraryDbContext context)
+        public UserService(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
         public async Task<ResultViewModel> AddUserAsync(CreateUserInputModel request)
@@ -19,11 +20,18 @@ namespace Library.Application.Services
             if (request == null)
                 return new ResultViewModel(false, "Invalid user.");
 
-            var user = new User(request.Username, request.Email);
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            var command = new AddUserCommand(request.Username, request.Email);
+            var result = await _mediator.Send(command);
 
-            return new ResultViewModel(true, "User registered successfully!");
+            return result;
+        }
+
+        public async Task<ResultViewModel<UserViewModel>> GetUserByIdAsync(int userId)
+        {
+            var query = new GetUserByIdQuery { UserId = userId };
+            var result = await _mediator.Send(query);
+
+            return result;
         }
     }
 }
