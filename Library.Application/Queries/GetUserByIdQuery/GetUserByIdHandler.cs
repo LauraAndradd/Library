@@ -1,5 +1,5 @@
 ﻿using Library.Application.Models;
-using Library.Infrastructure.Persistence;
+using Library.Core.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,25 +7,25 @@ namespace Library.Application.Queries.GetUserByIdQuery
 {
     public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, ResultViewModel<UserViewModel>>
     {
-        private readonly LibraryDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public GetUserByIdHandler(LibraryDbContext context)
+        public GetUserByIdHandler(IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task<ResultViewModel<UserViewModel>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users
-                .SingleOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(request.UserId);
 
             if (user == null)
             {
                 return new ResultViewModel<UserViewModel>(null, false, "User not found.");
             }
 
-            var userViewModel = new UserViewModel(user.Id, user.Username, user.Email);
-            return new ResultViewModel<UserViewModel>(userViewModel, true);
+            var model = UserViewModel.FromEntity(user);
+
+            return ResultViewModel<UserViewModel>.Success(model);
         }
     }
 }

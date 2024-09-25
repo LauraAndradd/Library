@@ -1,5 +1,6 @@
 ﻿using Library.Application.Models;
 using Library.Core.Entities;
+using Library.Core.Repositories;
 using Library.Infrastructure.Persistence;
 using MediatR;
 
@@ -7,21 +8,25 @@ namespace Library.Application.Commands.AddUserCommand
 {
     public class AddUserHandler : IRequestHandler<AddUserCommand, ResultViewModel>
     {
-        private readonly LibraryDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public AddUserHandler(LibraryDbContext context)
+        public AddUserHandler(IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task<ResultViewModel> Handle(AddUserCommand request, CancellationToken cancellationToken)
         {
+            var existingUser = await _userRepository.GetByUsernameAsync(request.Username);
+            if (existingUser != null)
+            {
+                return new ResultViewModel(false, "Username already exists.");
+            }
+
             var user = new User(request.Username, request.Email);
+            await _userRepository.AddAsync(user);
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return new ResultViewModel(true, "User successfully added.");
+            return ResultViewModel.Success();
         }
     }
 }

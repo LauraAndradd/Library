@@ -1,5 +1,10 @@
-﻿using Library.Application.Interfaces;
+﻿using Library.Application.Commands.AddBookCommand;
+using Library.Application.Commands.RemoveBookCommand;
+using Library.Application.Commands.UpdateBookCommand;
 using Library.Application.Models;
+using Library.Application.Queries.GetAllBooksQuery;
+using Library.Application.Queries.GetBookByIdQuery;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
@@ -8,17 +13,17 @@ namespace Library.Controllers
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
-        private readonly IBookService _bookService;
+        private readonly IMediator _mediator;
 
-        public BooksController(IBookService bookService)
+        public BooksController(IMediator mediator)
         {
-            _bookService = bookService;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllBooks()
         {
-            var result = await _bookService.GetAllBooksAsync();
+            var result = await _mediator.Send(new GetAllBooksQuery());
             if (!result.IsSuccess)
                 return BadRequest(result.Message);
 
@@ -28,7 +33,7 @@ namespace Library.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookById(int id)
         {
-            var result = await _bookService.GetBookByIdAsync(id);
+            var result = await _mediator.Send(new GetBookByIdQuery(id));
             if (!result.IsSuccess)
                 return NotFound(result.Message);
 
@@ -38,7 +43,7 @@ namespace Library.Controllers
         [HttpPost]
         public async Task<IActionResult> AddBook([FromBody] CreateBookInputModel request)
         {
-            var result = await _bookService.AddBookAsync(request);
+            var result = await _mediator.Send(new AddBookCommand(request.Title, request.Author, request.PublicationYear));
             if (!result.IsSuccess)
                 return BadRequest(result.Message);
 
@@ -48,7 +53,7 @@ namespace Library.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, [FromBody] UpdateBookInputModel request)
         {
-            var result = await _bookService.UpdateBookAsync(id, request);
+            var result = await _mediator.Send(new UpdateBookCommand(id, request.Title, request.Author, (int)request.PublicationYear));
             if (!result.IsSuccess)
                 return NotFound(result.Message);
 
@@ -58,7 +63,7 @@ namespace Library.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemoveBook(int id)
         {
-            var result = await _bookService.RemoveBookAsync(id);
+            var result = await _mediator.Send(new RemoveBookCommand(id));
             if (!result.IsSuccess)
                 return NotFound(result.Message);
 

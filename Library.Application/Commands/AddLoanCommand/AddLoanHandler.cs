@@ -1,5 +1,6 @@
 ﻿using Library.Application.Models;
 using Library.Core.Entities;
+using Library.Core.Repositories;
 using Library.Infrastructure.Persistence;
 using MediatR;
 
@@ -7,11 +8,11 @@ namespace Library.Application.Commands.AddLoanCommand
 {
     public class AddLoanHandler : IRequestHandler<AddLoanCommand, ResultViewModel>
     {
-        private readonly LibraryDbContext _context;
+        private readonly ILoanRepository _loanRepository;
 
-        public AddLoanHandler(LibraryDbContext context)
+        public AddLoanHandler(ILoanRepository loanRepository)
         {
-            _context = context;
+            _loanRepository = loanRepository;
         }
 
         public async Task<ResultViewModel> Handle(AddLoanCommand request, CancellationToken cancellationToken)
@@ -25,10 +26,9 @@ namespace Library.Application.Commands.AddLoanCommand
                 isReturned: false
             );
 
-            _context.Loans.Add(loan);
-            await _context.SaveChangesAsync();
+            await _loanRepository.AddLoanAsync(loan);
 
-            return new ResultViewModel(true, "Loan created successfully!");
+            return ResultViewModel.Success();
         }
     }
 }

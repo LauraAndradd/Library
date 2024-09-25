@@ -1,5 +1,6 @@
 using Library.Application;
 using Library.Application.Services;
+using Library.ExceptionHandler;
 using Library.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,8 @@ namespace Library
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
             var connectionString = builder.Configuration.GetConnectionString("LibraryCs");
             builder.Services.AddDbContext<LibraryDbContext>(o => o.UseSqlServer(connectionString));

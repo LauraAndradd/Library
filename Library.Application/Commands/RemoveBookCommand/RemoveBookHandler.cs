@@ -1,4 +1,5 @@
 ﻿using Library.Application.Models;
+using Library.Core.Repositories;
 using Library.Infrastructure.Persistence;
 using MediatR;
 
@@ -6,23 +7,22 @@ namespace Library.Application.Commands.RemoveBookCommand
 {
     public class RemoveBookHandler : IRequestHandler<RemoveBookCommand, ResultViewModel>
     {
-        private readonly LibraryDbContext _context;
+        private readonly IBookRepository _bookRepository;
 
-        public RemoveBookHandler(LibraryDbContext context)
+        public RemoveBookHandler(IBookRepository bookRepository)
         {
-            _context = context;
+            _bookRepository = bookRepository;
         }
 
         public async Task<ResultViewModel> Handle(RemoveBookCommand request, CancellationToken cancellationToken)
         {
-            var book = await _context.Books.FindAsync(request.BookId);
+            var book = await _bookRepository.GetByIdAsync(request.BookId);
             if (book == null)
             {
                 return ResultViewModel.Error("Book not found.");
             }
 
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
+            await _bookRepository.RemoveBookAsync(request.BookId);
 
             return ResultViewModel.Success();
         }

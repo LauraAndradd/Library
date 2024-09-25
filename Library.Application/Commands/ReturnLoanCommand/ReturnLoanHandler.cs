@@ -1,4 +1,5 @@
 ﻿using Library.Application.Models;
+using Library.Core.Repositories;
 using Library.Infrastructure.Persistence;
 using MediatR;
 
@@ -6,16 +7,16 @@ namespace Library.Application.Commands.ReturnLoanCommand
 {
     public class ReturnLoanHandler : IRequestHandler<ReturnLoanCommand, ResultViewModel>
     {
-        private readonly LibraryDbContext _context;
+        private readonly ILoanRepository _loanRepository;
 
-        public ReturnLoanHandler(LibraryDbContext context)
+        public ReturnLoanHandler(ILoanRepository loanRepository)
         {
-            _context = context;
+            _loanRepository = loanRepository;
         }
 
         public async Task<ResultViewModel> Handle(ReturnLoanCommand request, CancellationToken cancellationToken)
         {
-            var loan = await _context.Loans.FindAsync(request.LoanId);
+            var loan = await _loanRepository.GetLoanByIdAsync(request.LoanId);
             if (loan == null)
             {
                 return new ResultViewModel(false, "Loan not found.");
@@ -23,10 +24,9 @@ namespace Library.Application.Commands.ReturnLoanCommand
 
             loan.MarkAsReturned(request.ReturnDate);
 
-            _context.Loans.Update(loan);
-            await _context.SaveChangesAsync();
+            await _loanRepository.UpdateAsync(loan);
 
-            return new ResultViewModel(true, "Loan returned successfully!");
+            return ResultViewModel.Success();
         }
     }
 }
