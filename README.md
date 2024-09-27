@@ -21,7 +21,7 @@ Este projeto foi desenvolvido para otimizar o gerenciamento de uma biblioteca, p
 - Verifique se o .NET 8 SDK está instalado:
 **dotnet --version**
 - Configure o banco de dados SQL Server no arquivo appsettings.json:
-**"ConnectionStrings": {
+** "ConnectionStrings": {
   "LibraryCs": "Server=SEU_SERVIDOR;Database=LibraryDb;User Id=SEU_USUARIO;Password=SUA_SENHA;"
 }
 **
