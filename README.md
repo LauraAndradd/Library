@@ -18,7 +18,7 @@ Este projeto foi desenvolvido para otimizar o gerenciamento de uma biblioteca, p
 - https://github.com/LauraAndradd/Library.git
 
 ### 2. Configurar o Ambiente
-- Verifique se o .NET 8 SDK está instalado:
+- Verifique se o .NET 8 SDK está instalado:  
    dotnet --version
 - Configure o banco de dados SQL Server no arquivo appsettings.json:  
   "ConnectionStrings": {  
@@ -28,8 +28,8 @@ Este projeto foi desenvolvido para otimizar o gerenciamento de uma biblioteca, p
   dotnet user-secrets init  
   dotnet user-secrets set "ConnectionStrings:LibraryCs" "Server=SEU_SERVIDOR;Database=LibraryDb;User Id=SEU_USUARIO;Password=SUA_SENHA;"
 
-### 3. Rodar as Migrations
-- Aplique as migrações do Entity Framework Core para configurar o banco de dados:
+### 3. Rodar as Migrations  
+- Aplique as migrações do Entity Framework Core para configurar o banco de dados:  
   dotnet ef database update
 
 ### 4. Rodar o Projeto
