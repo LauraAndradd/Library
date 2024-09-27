@@ -18,28 +18,27 @@ Este projeto foi desenvolvido para otimizar o gerenciamento de uma biblioteca, p
 - https://github.com/LauraAndradd/Library.git
 
 ### 2. Configurar o Ambiente
-- Verifique se o .NET 8 SDK está instalado:  
-**dotnet --version**
+- Verifique se o .NET 8 SDK está instalado:
+   dotnet --version
 - Configure o banco de dados SQL Server no arquivo appsettings.json:  
-** "ConnectionStrings": {  
+  "ConnectionStrings": {  
   "LibraryCs": "Server=SEU_SERVIDOR;Database=LibraryDb;User Id=SEU_USUARIO;Password=SUA_SENHA;"  
-}  
-**
+  }  
 - Configure User Secrets (se necessário):  
-**dotnet user-secrets init  
-dotnet user-secrets set "ConnectionStrings:LibraryCs" "Server=SEU_SERVIDOR;Database=LibraryDb;User Id=SEU_USUARIO;Password=SUA_SENHA;"**
+  dotnet user-secrets init  
+  dotnet user-secrets set "ConnectionStrings:LibraryCs" "Server=SEU_SERVIDOR;Database=LibraryDb;User Id=SEU_USUARIO;Password=SUA_SENHA;"
 
 ### 3. Rodar as Migrations
-- Aplique as migrações do Entity Framework Core para configurar o banco de dados:  
-**dotnet ef database update**
+- Aplique as migrações do Entity Framework Core para configurar o banco de dados:
+  dotnet ef database update
 
 ### 4. Rodar o Projeto
 - Execute o projeto localmente:  
-**dotnet run --project Library**
+  dotnet run --project Library
 
 ### Docker
 Se você deseja rodar a aplicação no Docker, use o seguinte comando para construir e rodar o container:  
-**docker-compose up --build**
+  docker-compose up --build
 
 ## 📂 Estrutura do Projeto
 
